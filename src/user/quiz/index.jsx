@@ -8,7 +8,7 @@ const QuizPage = () => {
             </div>
 
             <div className='flex flex-col space-y-4'>
-                 
+
                 <div className='flex items-center  bg-gray-100 rounded-lg shadow-md cursor-pointer hover:bg-gray-200 transition'>
                     <div className='flex items-center justify-center w-10 h-10 bg-blue-500 border border-gray-300 rounded'>
                         <p className='text-white text-2xl font-bold'>A</p>
