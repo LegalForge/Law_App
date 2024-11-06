@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,6 +8,7 @@ export default {
     theme: {
       screens: {
         'sm': '414px',
+        // 'sm': '640px',
         // => @media (min-width: 640px) { ... }
   
         'md': '768px',
@@ -24,5 +25,7 @@ export default {
       }
     }
   },
-  plugins: [],
+  // plugins: [
+  //   require('@tailwindcss/aspect-ratio'),
+  // ],
 }

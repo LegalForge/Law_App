@@ -7,15 +7,27 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import QuizPage from './user/quiz';
+import LandingPage from './components/LandingPage';
+import AdminDashboard from './admin/AdminDashboard';
+import StudentDashboard from './student/StudentDashboard';
+
 function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Home />
+      element: <LandingPage />
     },
     {
       path: "quiz",
-      element:< QuizPage/>
+      element: <QuizPage/>
+    },
+    {
+      path: "admin",
+      element: <AdminDashboard />
+    },
+    {
+      path: "student",
+      element: <StudentDashboard />
     }
   ]);
   return (
