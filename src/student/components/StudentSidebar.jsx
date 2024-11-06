@@ -5,7 +5,6 @@ import {
   FiClock, 
   FiAward, 
   FiUser, 
-  FiSettings, 
   FiHelpCircle,
   FiLogOut 
 } from 'react-icons/fi';
@@ -17,7 +16,6 @@ function StudentSidebar({ activeTab, setActiveTab, isSidebarOpen }) {
     { id: 'progress', label: 'My Progress', icon: FiClock },
     { id: 'achievements', label: 'Achievements', icon: FiAward },
     { id: 'profile', label: 'Profile', icon: FiUser },
-    { id: 'settings', label: 'Settings', icon: FiSettings },
     { id: 'help', label: 'Help & Support', icon: FiHelpCircle },
   ];
 

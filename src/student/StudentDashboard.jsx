@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import StudentSidebar from './components/StudentSidebar';
 import StudentNavbar from './components/StudentNavbar';
+import AvailableQuizzes from './components/pages/AvailableQuizzes';
+import Progress from './components/pages/Progress';
 import QuizSection from './components/QuizSection';
 import ResultSection from './components/ResultSection';
+import Profile from './components/pages/Profile';
+import HelpSupport from './components/pages/HelpSupport';
+import Achievements from './components/pages/Achievements';
+import Dashboard from './components/pages/Dashboard';
 
 function StudentDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -10,6 +16,30 @@ function StudentDashboard() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
+
+  const handleStartQuiz = (quizId) => {
+    setQuizStarted(true);
+    // Add logic to load specific quiz
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard />;
+      case 'quizzes':
+        return <AvailableQuizzes onStartQuiz={handleStartQuiz} />;
+      case 'progress':
+        return <Progress />;
+      case 'profile':
+        return <Profile />;
+      case 'achievements':
+        return <Achievements />;
+      case 'help':
+        return <HelpSupport />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -28,39 +58,7 @@ function StudentDashboard() {
 
         <main className="p-6">
           <div className="max-w-7xl mx-auto">
-            {activeTab === 'dashboard' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Dashboard content */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h2 className="text-lg font-semibold mb-4">Quick Stats</h2>
-                  {/* Add dashboard stats */}
-                </div>
-                {/* Add more dashboard widgets */}
-              </div>
-            )}
-
-            {activeTab === 'quizzes' && !quizStarted && !quizCompleted && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Available Quizzes</h2>
-                {/* Add quiz list */}
-              </div>
-            )}
-
-            {quizStarted && !quizCompleted && (
-              <QuizSection 
-                onComplete={(finalScore) => {
-                  setScore(finalScore);
-                  setQuizCompleted(true);
-                  setQuizStarted(false);
-                }}
-              />
-            )}
-
-            {quizCompleted && (
-              <ResultSection score={score} />
-            )}
-
-            {/* Add other tab content */}
+            {renderContent()}
           </div>
         </main>
       </div>
