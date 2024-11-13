@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import StudentSidebar from './components/StudentSidebar';
 import StudentNavbar from './components/StudentNavbar';
 import AvailableQuizzes from './components/pages/AvailableQuizzes';
+import QuizSession from './components/pages/QuizSession';
 import Progress from './components/pages/Progress';
 import QuizSection from './components/QuizSection';
 import ResultSection from './components/ResultSection';
@@ -16,13 +17,33 @@ function StudentDashboard() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [score, setScore] = useState(0);
+  const [activeQuiz, setActiveQuiz] = useState(null);
+  const [quizHistory, setQuizHistory] = useState([]);
 
   const handleStartQuiz = (quizId) => {
-    setQuizStarted(true);
-    // Add logic to load specific quiz
+    setActiveQuiz(quizId);
+  };
+
+  const handleQuizComplete = (results) => {
+    // Add to quiz history
+    setQuizHistory(prev => [...prev, {
+      id: activeQuiz,
+      date: new Date(),
+      ...results
+    }]);
+    
+    // Reset quiz state
+    setActiveQuiz(null);
+    
+    // Navigate to dashboard or progress page
+    setActiveTab('progress');
   };
 
   const renderContent = () => {
+    if (activeQuiz) {
+      return <QuizSession quizId={activeQuiz} onComplete={handleQuizComplete} />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
