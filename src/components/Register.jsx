@@ -1,29 +1,44 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaCheckCircle } from 'react-icons/fa';
+import { registerUser } from '../services/Auth';
 
 function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    // confirmPassword: '',
+    role: 'admin',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Validate password length if needed
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
     try {
       // Add your registration logic here
-      // If successful, redirect to dashboard or home
-      navigate('/dashboard');
+      setLoading(true);
+      const response = await registerUser(formData);
+      console.log(formData);
+      // console.log(response);
+      if (response.status === 200) {
+        navigate('/admin');
+        toast.success('Registration successful',);
+      }
     } catch (err) {
       setError('Registration failed. Please try again.');
+      toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.log(err);
+    } finally {
+      setLoading(false);
+      
     }
   };
 
@@ -97,10 +112,11 @@ function Register() {
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Confirm password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
               </div>
+              
             </div>
 
             <div className="flex items-center">
@@ -125,9 +141,10 @@ function Register() {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out transform hover:-translate-y-0.5"
             >
-              Create Account
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 

@@ -35,7 +35,7 @@ function LandingPage() {
           Ready to access our full library of legal case quizzes? Create an account or log in to:
         </p>
         <ul className="list-disc list-inside mb-6 text-gray-700">
-          <li>Access all premium quizzes</li>
+          <li>Access all  quizzes</li>
           <li>Track your progress</li>
           <li>Save your scores</li>
           <li>Get personalized recommendations</li>

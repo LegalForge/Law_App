@@ -1,17 +1,31 @@
 import React, { useState } from 'react';
-import { 
-  FiBell, 
-  FiSearch, 
-  FiMessageSquare, 
-  FiSettings, 
-  FiHelpCircle, 
+import {
+  FiBell,
+  FiSearch,
+  FiMessageSquare,
+  FiSettings,
+  FiHelpCircle,
   FiLogOut,
   FiChevronDown
 } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AdminNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+ 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    
+    // Show the toast notification
+    toast.success('Logged out successfully');
+
+    // Delay the redirection to allow the toast to show
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 1000); // Redirect after 1 second
+  };
 
   const notifications = [
     {
@@ -105,7 +119,7 @@ function AdminNavbar() {
                   <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
                     AD
                   </div>
-                  <span className="text-sm font-medium text-gray-700">Admin User</span>
+                  <span className="text-sm font-medium text-gray-700">Admin</span>
                   <FiChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
               </button>
@@ -133,7 +147,8 @@ function AdminNavbar() {
                     className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center space-x-2"
                   >
                     <FiLogOut className="h-4 w-4" />
-                    <span>Sign out</span>
+                    <span onClick={handleLogout}>Sign out</span>
+                    {/* <span>Sign out</span> */}
                   </a>
                 </div>
               )}

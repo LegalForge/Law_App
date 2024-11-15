@@ -22,10 +22,10 @@ function AdminDashboard() {
     switch (activeTab) {
       case 'dashboard':
         return <AdminDashboardContent />;
-      case 'courses':
-        return <CourseManagement />;
-      case 'content':
-        return <ContentManagement />;
+      // case 'courses':
+      //   return <CourseManagement />;
+      // case 'content':
+      //   return <ContentManagement />;
       case 'quizzes':
         return <QuizManagement />;
       default:
