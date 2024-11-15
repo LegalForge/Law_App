@@ -9,7 +9,7 @@ function Register() {
     email: '',
     password: '',
     // confirmPassword: '',
-    role: 'admin',
+    role: 'student',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ function Register() {
       console.log(formData);
       // console.log(response);
       if (response.status === 200) {
-        navigate('/admin');
+        navigate('/student');
         toast.success('Registration successful',);
       }
     } catch (err) {
