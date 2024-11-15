@@ -24,7 +24,8 @@ function Login() {
       if (response.status === 200) {
         localStorage.setItem('token', response.data.token);
         navigate('/admin');
-        toast.success(`Welcome back ${response.data.user.name}`);  
+        toast.success(`Welcome back`);  
+        // toast.success(`Welcome back ${response.data.user.name}`);  
       }
     } catch (err) {
       console.error('Login error:', err.response ? err.response.data : err);
