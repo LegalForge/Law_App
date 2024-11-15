@@ -26,7 +26,8 @@ function App() {
     {
       path: "admin",
       element: (
-        <AuthGuard allowedRole="admin">
+        <AuthGuard >
+        {/* <AuthGuard allowedRole="admin"> */}
           <AdminDashboard />
         </AuthGuard>
       )
@@ -34,7 +35,10 @@ function App() {
     {
       path: "student",
       element: (
-        <AuthGuard allowedRole="student">
+        <AuthGuard >
+
+        {/* </AuthGuard> */}
+        {/* // <AuthGuard allowedRole="student"> */}
           <StudentDashboard />
         </AuthGuard>
       )
