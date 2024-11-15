@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaFacebook } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { loginUser } from '../services/Auth';
+import { toast } from 'react-toastify'; // Only import toast
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -8,16 +12,27 @@ function Login() {
     password: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      // Add your login logic here
-      // If successful, redirect to dashboard or home
-      navigate('/dashboard');
+      const response = await loginUser(formData);
+      console.log(response.data); // Log the response data
+      if (response.status === 200) {
+        localStorage.setItem('token', response.data.token);
+        navigate('/admin');
+        toast.success(`Welcome back ${response.data.user.name}`);  
+      }
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      console.error('Login error:', err.response ? err.response.data : err);
+      const errorMessage = err.response?.data?.message || 'Invalid credentials. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage); // Show error toast
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,7 +65,7 @@ function Login() {
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Email address"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
 
@@ -64,7 +79,7 @@ function Login() {
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
               </div>
             </div>
@@ -91,9 +106,10 @@ function Login() {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out transform hover:-translate-y-0.5"
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
@@ -108,23 +124,25 @@ function Login() {
 
           <div className="grid grid-cols-2 gap-3">
             <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <img className="h-5 w-5" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
+              <FcGoogle size={25} />
             </button>
             <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <img className="h-5 w-5" src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="Facebook logo" />
+              <FaFacebook size={25} color='blue' />
             </button>
           </div>
-        </div>
 
-        <p className="text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign up
-          </Link>
-        </p>
+          <div className='flex justify-center items-center'>
+            <p className="text-center text-sm text-gray-600 mt-4">
+              Don't have an account?{' '}
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-export default Login; 
+export default Login;
