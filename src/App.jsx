@@ -1,39 +1,19 @@
-import { useState } from 'react'
-
-import './App.css'
-import Home from './user/home'
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import QuizPage from './user/quiz';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
-import AdminDashboard from './admin/AdminDashboard';
-import StudentDashboard from './student/StudentDashboard';
+import Login from './components/Login';
+import Register from './components/Register';
 
 function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <LandingPage />
-    },
-    {
-      path: "quiz",
-      element: <QuizPage/>
-    },
-    {
-      path: "admin",
-      element: <AdminDashboard />
-    },
-    {
-      path: "student",
-      element: <StudentDashboard />
-    }
-  ]);
   return (
-    <RouterProvider router={router} />
-  )
-
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        {/* Add other routes as needed */}
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
