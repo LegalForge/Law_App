@@ -53,14 +53,13 @@ const SampleQuiz = ({ onComplete }) => {
   const handleSubmit = () => {
     onComplete(score);
   };
-
   if (showCelebration) {
     return (
       <div className="text-center space-y-6 py-8">
-        <h3 className="text-3xl font-bold text-gray-900">🎉 Congratulations!</h3>
+        <h3 className="text-3xl font-bold text-gray-900">🌟 Great Effort!</h3>
         <p className="text-xl">You scored {score} out of {sampleQuestions.length}</p>
         <p className="text-gray-600">
-          Sign up to Legal Forage to access more quizzes and track your progress!
+          Keep pushing forward—you're doing amazing! Sign up to Legal Forage to access more quizzes and track your progress!
         </p>
         <button 
           onClick={handleSubmit}
@@ -71,7 +70,8 @@ const SampleQuiz = ({ onComplete }) => {
         </button>
       </div>
     );
-  }
+}
+
 
   return (
     <div className='bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 backdrop-blur-sm p-8 rounded-xl 
