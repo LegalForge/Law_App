@@ -7,6 +7,7 @@ import StudentDashboard from '../src/dashboard/student/StudentDashboard';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import QuestionForm from './dashboard/admin/QuestionForm';
+import AuthGuard from './components/guards/AuthGuard';
 
 function App() {
   const router = createBrowserRouter([
@@ -19,27 +20,39 @@ function App() {
       element: <Login />
     },
     {
-      path:'questions-form',
-      element:<QuestionForm />
-    },
-    {
       path: "register",
       element: <Register />
     },
     {
       path: "admin",
-      element: <AdminDashboard />
+      element: (
+        <AuthGuard allowedRole="admin">
+          <AdminDashboard />
+        </AuthGuard>
+      )
     },
     {
       path: "student",
-      element: <StudentDashboard />
+      element: (
+        <AuthGuard allowedRole="student">
+          <StudentDashboard />
+        </AuthGuard>
+      )
+    },
+    {
+      path:'questions-form',
+      element: (
+        <AuthGuard allowedRole="admin">
+          <QuestionForm />
+        </AuthGuard>
+      )
     }
   ]);
 
   return (
     <>
       <RouterProvider router={router} />
-      <ToastContainer /> {/* Move ToastContainer here */}
+      <ToastContainer />
     </>
   );
 }
