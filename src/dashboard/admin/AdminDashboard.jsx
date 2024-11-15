@@ -4,15 +4,15 @@ import AdminDashboardContent from './components/pages/AdminDashboard';
 import ContentManagement from './components/pages/ContentManagement';
 import QuizManagement from './components/pages/QuizManagement';
 import CourseManagement from './components/pages/CourseManagement';
-import { FiHome, FiBook, FiFileText, FiSettings, FiHelpCircle, FiList } from 'react-icons/fi';
+import CasesManagement from './components/pages/CasesManagement';
+import { FiHome, FiBook, FiFileText, FiSettings, FiHelpCircle, FiList, FiFolder } from 'react-icons/fi';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const navigation = [
     { id: 'dashboard', name: 'Dashboard', icon: FiHome },
-    // { id: 'courses', name: 'Course Management', icon: FiBook },
-    // { id: 'content', name: 'Content Management', icon: FiFileText },
+    { id: 'cases', name: 'Cases Management', icon: FiFolder },
     { id: 'quizzes', name: 'Quiz Management', icon: FiList },
     { id: 'settings', name: 'Settings', icon: FiSettings },
     { id: 'help', name: 'Help & Support', icon: FiHelpCircle }
@@ -22,10 +22,8 @@ function AdminDashboard() {
     switch (activeTab) {
       case 'dashboard':
         return <AdminDashboardContent />;
-      // case 'courses':
-      //   return <CourseManagement />;
-      // case 'content':
-      //   return <ContentManagement />;
+      case 'cases':
+        return <CasesManagement />;
       case 'quizzes':
         return <QuizManagement />;
       default:

@@ -32,7 +32,7 @@ function LandingPage() {
         <h2 className="text-2xl font-bold mb-4">Great job on completing the trial quiz!</h2>
         <p className="mb-2">Your score: {quizScore}%</p>
         <p className="mb-6">
-          Ready to access our full library of legal case quizzes? Create an account or log in to:
+          Ready to access our full library of legal cases and  quizzes? Create an account or log in to:
         </p>
         <ul className="list-disc list-inside mb-6 text-gray-700">
           <li>Access all  quizzes</li>
@@ -96,14 +96,14 @@ function LandingPage() {
           How Legal Forage Works
         </h3>
         <div className="relative w-full pb-[56.25%] bg-gray-100 rounded-xl overflow-hidden">
-          <iframe 
-            className="absolute top-0 left-0 w-full h-full"
-            src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-            title="Legal Forage Demo"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
+  <iframe 
+    className="absolute top-0 left-0 w-full h-full"
+    src="https://www.youtube.com/embed/CezlmUwMXNo" // Updated URL format
+    title="Legal Forage Demo"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</div>
       </section>
 
       {/* Updated Sample Quiz Section */}
