@@ -1,10 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import SampleQuiz from './SampleQuiz';
 import TestimonialCarousel from './TestimonialCarousel';
 
 function LandingPage() {
   const videoRef = useRef(null);
   const quizRef = useRef(null);
+  const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
+  const [quizScore, setQuizScore] = useState(null);
 
   const scrollToVideo = () => {
     videoRef.current?.scrollIntoView({ 
@@ -17,6 +20,49 @@ function LandingPage() {
       behavior: 'smooth'
     });
   };
+
+  const handleQuizComplete = (score) => {
+    setQuizScore(score);
+    setShowPremiumPrompt(true);
+  };
+
+  const PremiumPromptModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+        <h2 className="text-2xl font-bold mb-4">Great job on completing the trial quiz!</h2>
+        <p className="mb-2">Your score: {quizScore}%</p>
+        <p className="mb-6">
+          Ready to access our full library of legal case quizzes? Create an account or log in to:
+        </p>
+        <ul className="list-disc list-inside mb-6 text-gray-700">
+          <li>Access all premium quizzes</li>
+          <li>Track your progress</li>
+          <li>Save your scores</li>
+          <li>Get personalized recommendations</li>
+        </ul>
+        <div className="flex flex-col gap-3">
+          <Link 
+            to="/register" 
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-center"
+          >
+            Create Free Account
+          </Link>
+          <Link 
+            to="/login" 
+            className="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 text-center"
+          >
+            Log In
+          </Link>
+          <button 
+            onClick={() => setShowPremiumPrompt(false)}
+            className="text-gray-500 hover:text-gray-700 text-sm mt-2"
+          >
+            Continue Browsing
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -60,7 +106,7 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Sample Quiz Section */}
+      {/* Updated Sample Quiz Section */}
       <section ref={quizRef} className="my-16">
         <h3 className="text-2xl font-semibold text-center text-gray-900 mb-8">
           Try a Sample Quiz
@@ -72,7 +118,7 @@ function LandingPage() {
                 Sample Quiz
               </span>
             </div>
-            <SampleQuiz />
+            <SampleQuiz onComplete={handleQuizComplete} />
           </div>
         </div>
       </section>
@@ -85,15 +131,20 @@ function LandingPage() {
         <TestimonialCarousel />
       </section>
 
-      {/* Call to Action Section */}
+      {/* Updated Call to Action Section */}
       <section className="my-16 text-center bg-blue-50 rounded-xl p-12">
         <h3 className="text-3xl font-bold text-gray-900 mb-4">
           Ready to Excel in Your Legal Studies?
         </h3>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Join Legal Forage today and transform how you learn case law.
+          Join Legal Forage today and get access to our complete library of case law quizzes.
         </p>
-        {/* ... CTA button ... */}
+        <Link 
+          to="/register"
+          className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Get Started Now
+        </Link>
       </section>
 
       {/* Footer */}
@@ -102,6 +153,9 @@ function LandingPage() {
           <p>© 2024 Legal Forage. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Premium Prompt Modal */}
+      {showPremiumPrompt && <PremiumPromptModal />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function SampleQuiz() {
+const SampleQuiz = ({ onComplete }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [score, setScore] = useState(0);
@@ -50,6 +50,10 @@ function SampleQuiz() {
     }
   };
 
+  const handleSubmit = () => {
+    onComplete(score);
+  };
+
   if (showCelebration) {
     return (
       <div className="text-center space-y-6 py-8">
@@ -59,7 +63,7 @@ function SampleQuiz() {
           Sign up to Legal Forage to access more quizzes and track your progress!
         </p>
         <button 
-          onClick={() => window.location.href = '/signup'}
+          onClick={handleSubmit}
           className="bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 
             transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
         >
