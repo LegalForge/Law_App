@@ -23,7 +23,7 @@ function Login() {
       console.log(response.data); // Log the response data
       if (response.status === 200) {
         localStorage.setItem('token', response.data.token);
-        navigate('/admin');
+        navigate('/student');
         toast.success(`Welcome back`);  
         // toast.success(`Welcome back ${response.data.user.name}`);  
       }
