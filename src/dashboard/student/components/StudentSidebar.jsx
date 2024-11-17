@@ -8,8 +8,9 @@ import {
   FiHelpCircle,
   FiLogOut 
 } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 
-function StudentSidebar({ activeTab, setActiveTab, isSidebarOpen }) {
+const StudentSidebar = ({ activeTab, setActiveTab, isSidebarOpen }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: FiHome },
     { id: 'quizzes', label: 'Available Quizzes', icon: FiBook },
@@ -18,6 +19,23 @@ function StudentSidebar({ activeTab, setActiveTab, isSidebarOpen }) {
     { id: 'profile', label: 'Profile', icon: FiUser },
     { id: 'help', label: 'Help & Support', icon: FiHelpCircle },
   ];
+
+  const handleLogout = () => {
+    // Clear token from localStorage
+    localStorage.removeItem('token');
+    
+    // Clear token from React Native WebView if in mobile app
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'CLEAR_TOKEN'
+      }));
+    }
+
+    // Redirect to login page
+    window.location.href = '/login';
+    // Show toast notification for logout
+    toast.info('Logged out successfully');
+  };
 
   return (
     <aside 
@@ -28,11 +46,12 @@ function StudentSidebar({ activeTab, setActiveTab, isSidebarOpen }) {
         <SidebarProfile />
         <SidebarNavigation menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab} />
         <SidebarProgress />
-        <SidebarLogout />
+        {/* Pass handleLogout as a prop */}
+        <SidebarLogout handleLogout={handleLogout} />
       </div>
     </aside>
   );
-}
+};
 
 function SidebarProfile() {
   return (
@@ -87,10 +106,13 @@ function SidebarProgress() {
   );
 }
 
-function SidebarLogout() {
+function SidebarLogout({ handleLogout }) {
   return (
     <div className="p-4 border-t border-gray-200">
-      <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-blue-600 hover:bg-red-50 transition-colors duration-200">
+      <button 
+        onClick={handleLogout} 
+        className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-blue-600 hover:bg-red-50 transition-colors duration-200"
+      >
         <FiLogOut className="w-5 h-5" />
         <span>Logout</span>
       </button>
@@ -98,4 +120,4 @@ function SidebarLogout() {
   );
 }
 
-export default StudentSidebar; 
+export default StudentSidebar;

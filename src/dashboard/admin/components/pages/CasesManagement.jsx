@@ -4,9 +4,11 @@ import { FiSearch } from "react-icons/fi";
 import { Viewer, Worker } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import { toast } from 'react-toastify';
-import { getCases } from '../../../../services/Cases';
+import { getCases, updateCase } from '../../../../services/Cases';
 import Swal from 'sweetalert2';
 import { deleteCase } from '../../../../services/Cases';
+import { createCase } from '../../../../services/Cases';
+import { useNavigate } from 'react-router-dom';
 
 // Import styles
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -64,6 +66,7 @@ function CasesManagement() {
     const [casesPerPage] = useState(5); // Number of cases per page
     const [showPdfPreview, setShowPdfPreview] = useState(false);
     const [selectedPdf, setSelectedPdf] = useState(null);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -114,44 +117,55 @@ function CasesManagement() {
         formData.append('title', caseData.title);
         formData.append('summary', caseData.summary);
         formData.append('citation', caseData.citation);
+        
         if (caseData.icon) {
             formData.append('icon', caseData.icon);
         }
 
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            toast.error('Authentication token not found. Please log in again.');
+            setLoading(false);
+            navigate('/login');
+            return;
+        }
+
         try {
-            const url = isEditing
-                ? `https://law-api-8un9.onrender.com/cases/${editingId}`
-                : 'https://law-api-8un9.onrender.com/cases';
+            const response = await createCase(formData, `Bearer ${token}`);
 
-            const method = isEditing ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                body: formData,
-            });
-
-            if (response.ok) {
-                alert(isEditing ? 'Case updated successfully!' : 'Case uploaded successfully!');
+            if (response.status === 200 || response.status === 201) {
+                toast.success('Case uploaded successfully!');
                 resetForm();
                 fetchCases();
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(isEditing ? 'Failed to update case' : 'Failed to upload case');
+            if (error?.response?.status === 401) {
+                localStorage.removeItem('token');
+                toast.error('Session expired. Please login again.');
+                navigate('/login');
+                return;
+            }
+            const errorMessage = error?.response?.data?.message || 'Failed to upload case';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     // Delete
-
-     
-    
     const handleDelete = async (id) => {
         try {
+            if (!id) {
+                toast.error('Invalid case ID');
+                return;
+            }
+
             const result = await Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
+
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -160,21 +174,17 @@ function CasesManagement() {
             });
 
             if (!result.isConfirmed) {
-                
-                toast.info('Deletion cancelled');
                 return;
             }
 
             setLoading(true);
-            const response = await deleteCase(id);
+            await deleteCase(id);
+            toast.success('Case deleted successfully');
+            await fetchCases(); // Refresh the cases list
 
-            if (response.status === 200) {
-                toast.success('Case deleted successfully');
-                fetchCases(); // Refresh the cases list
-            }
         } catch (error) {
             console.error('Error deleting case:', error);
-            toast.error(error.response?.data?.message || 'Failed to delete case');
+            toast.error(error?.response?.data?.message || 'Failed to delete case');
         } finally {
             setLoading(false);
         }
@@ -183,7 +193,7 @@ function CasesManagement() {
     // Edit
     const handleEdit = (caseItem) => {
         setIsEditing(true);
-        setEditingId(caseItem._id);
+        setEditingId(caseItem.id);
         setCaseData({
             title: caseItem.title,
             summary: caseItem.summary,
@@ -199,6 +209,9 @@ function CasesManagement() {
         e.preventDefault();
         setLoading(true);
 
+        // Debug log
+        console.log('Updating case with ID:', editingId);
+
         const formData = new FormData();
         formData.append('title', caseData.title);
         formData.append('summary', caseData.summary);
@@ -209,22 +222,29 @@ function CasesManagement() {
         }
 
         try {
-            const response = await fetch(`https://law-api-8un9.onrender.com/cases/${editingId}`, {
-                method: 'PATCH',
-                body: formData,
-            });
+            // Make sure editingId exists and is in the correct format
+            if (!editingId) {
+                toast.error('No case selected for update');
+                return;
+            }
 
-            if (response.ok) {
-                alert('Case updated successfully!');
+            const response = await updateCase(editingId, formData);
+            if (response.status === 200 || response.status === 201) {
+                toast.success('Case updated successfully!');
                 resetForm();
                 fetchCases();
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update case');
+                setEditingId(null); // Clear editing state
             }
         } catch (error) {
             console.error('Error updating case:', error);
-            alert(error.message || 'Failed to update case');
+            console.log('Error response:', error.response); // Debug log
+            
+            if (error.response?.status === 404) {
+                toast.error('Case not found. Please refresh and try again.');
+            } else {
+                const errorMessage = error?.response?.data?.message || 'Failed to update case';
+                toast.error(errorMessage);
+            }
         } finally {
             setLoading(false);
         }
@@ -251,6 +271,7 @@ function CasesManagement() {
                 caseItem.summary.toLowerCase().includes(searchTerm.toLowerCase());
 
             if (filterCriteria === 'all') return matchesSearch;
+            
             // Add more filter criteria as needed
             return matchesSearch;
         });
@@ -387,7 +408,7 @@ function CasesManagement() {
                         <FiEdit />
                     </button>
                     <button
-                        onClick={() => handleDelete(caseItem._id)}
+                        onClick={() => handleDelete(caseItem.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                         title="Delete Case"
                     >
@@ -562,7 +583,7 @@ function CasesManagement() {
                             <div className="space-y-4">
                                 {currentCases.map((caseItem) => (
                                     <CaseItem
-                                        key={caseItem._id}
+                                        key={caseItem.id}
                                         caseItem={caseItem}
                                     />
                                 ))}
