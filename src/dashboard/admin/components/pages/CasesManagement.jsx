@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiUpload, FiDownload, FiTrash2, FiEdit, FiX, FiChevronLeft, FiChevronRight, FiEye } from 'react-icons/fi';
 import { FiSearch } from "react-icons/fi";
-import { Viewer, Worker } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import { toast } from 'react-toastify';
 import { getCases, updateCase } from '../../../../services/Cases';
 import Swal from 'sweetalert2';
@@ -10,38 +8,72 @@ import { deleteCase } from '../../../../services/Cases';
 import { createCase } from '../../../../services/Cases';
 import { useNavigate } from 'react-router-dom';
 
-// Import styles
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+ 
 
 // Update the PDF Preview Modal component
 const PdfPreviewModal = ({ pdfUrl, onClose }) => {
-    const defaultLayoutPluginInstance = defaultLayoutPlugin();
+    const [isError, setIsError] = useState(false);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg w-full h-[90vh] overflow-hidden flex flex-col">
                 <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="text-lg font-semibold">PDF Preview</h3>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full"
-                    >
-                        <FiX className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <a
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                            Open in New Tab
+                        </a>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-gray-100 rounded-full"
+                        >
+                            <FiX className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex-1">
-                    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-                        <Viewer
-                            fileUrl={pdfUrl}
-                            plugins={[defaultLayoutPluginInstance]}
-                            defaultScale={1}
-                            onError={(error) => {
-                                console.error('Error loading PDF:', error);
-                            }}
-                        />
-                    </Worker>
+                    {isError ? (
+                        <div className="h-full flex flex-col items-center justify-center p-4">
+                            <p className="text-gray-600 mb-4">Unable to preview PDF directly.</p>
+                            <a
+                                href={pdfUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            >
+                                Open PDF in New Tab
+                            </a>
+                        </div>
+                    ) : (
+                        <object
+                            data={pdfUrl}
+                            type="application/pdf"
+                            className="w-full h-full"
+                            onError={() => setIsError(true)}
+                        >
+                            <iframe
+                                src={pdfUrl}
+                                className="w-full h-full"
+                                title="PDF Preview"
+                                onError={() => setIsError(true)}
+                            >
+                                <p>Your browser does not support PDF preview.</p>
+                                <a
+                                    href={pdfUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Click here to view the PDF
+                                </a>
+                            </iframe>
+                        </object>
+                    )}
                 </div>
             </div>
         </div>
@@ -63,7 +95,7 @@ function CasesManagement() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCriteria, setFilterCriteria] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [casesPerPage] = useState(5); // Number of cases per page
+    const [casesPerPage] = useState(2); // Number of cases per page
     const [showPdfPreview, setShowPdfPreview] = useState(false);
     const [selectedPdf, setSelectedPdf] = useState(null);
     const navigate = useNavigate();
@@ -271,6 +303,18 @@ function CasesManagement() {
                 caseItem.summary.toLowerCase().includes(searchTerm.toLowerCase());
 
             if (filterCriteria === 'all') return matchesSearch;
+            if (filterCriteria === 'recent') {
+                // Assuming cases have a timestamp or date field
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                return matchesSearch && new Date(caseItem.createdAt) >= thirtyDaysAgo;
+            }
+            if (filterCriteria === 'constitutional law') {
+                return matchesSearch && caseItem.category === 'constitutional';
+            }
+            if (filterCriteria === 'criminal') {
+                return matchesSearch && caseItem.category === 'criminal';
+            }
             
             // Add more filter criteria as needed
             return matchesSearch;
@@ -371,6 +415,7 @@ function CasesManagement() {
     };
 
     const handlePreview = (pdfUrl) => {
+        console.log('PDF URL:', pdfUrl);
         setSelectedPdf(pdfUrl);
         setShowPdfPreview(true);
     };
@@ -390,13 +435,27 @@ function CasesManagement() {
                         onClick={() => handlePreview(caseItem.icon)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                         title="Preview PDF"
+                        
                     >
                         <FiEye />
                     </button>
                     <button
-                        onClick={() => window.open(caseItem.icon, '_blank')}
+                        // onClick={() => window.open(caseItem.icon, '_blank')}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                         title="Download PDF"
+                    onClick={() => {
+                        const downloadUrl = caseItem.icon;
+                        const fileName = `${caseItem.title}.pdf`;
+                        
+                        const link = document.createElement('a');
+                        link.href = downloadUrl;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        return downloadLink;
+                    }}
                     >
                         <FiDownload />
                     </button>
