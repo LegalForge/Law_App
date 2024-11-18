@@ -1,45 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import { FiUpload, FiDownload, FiTrash2, FiEdit, FiX, FiChevronLeft, FiChevronRight, FiEye } from 'react-icons/fi';
 import { FiSearch } from "react-icons/fi";
-import { Viewer, Worker } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import { toast } from 'react-toastify';
-import { getCases } from '../../../../services/Cases';
+import { getUserCases, updateCase } from '../../../../services/Cases';
 import Swal from 'sweetalert2';
 import { deleteCase } from '../../../../services/Cases';
+import { createCase } from '../../../../services/Cases';
+import { useNavigate } from 'react-router-dom';
 
-// Import styles
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+ 
 
 // Update the PDF Preview Modal component
 const PdfPreviewModal = ({ pdfUrl, onClose }) => {
-    const defaultLayoutPluginInstance = defaultLayoutPlugin();
+    const [isError, setIsError] = useState(false);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white rounded-lg w-full h-[90vh] overflow-hidden flex flex-col">
                 <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="text-lg font-semibold">PDF Preview</h3>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full"
-                    >
-                        <FiX className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <a
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        >
+                            Open in New Tab
+                        </a>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-gray-100 rounded-full"
+                        >
+                            <FiX className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex-1">
-                    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-                        <Viewer
-                            fileUrl={pdfUrl}
-                            plugins={[defaultLayoutPluginInstance]}
-                            defaultScale={1}
-                            onError={(error) => {
-                                console.error('Error loading PDF:', error);
-                            }}
-                        />
-                    </Worker>
+                    {isError ? (
+                        <div className="h-full flex flex-col items-center justify-center p-4">
+                            <p className="text-gray-600 mb-4">Unable to preview PDF directly.</p>
+                            <a
+                                href={pdfUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            >
+                                Open PDF in New Tab
+                            </a>
+                        </div>
+                    ) : (
+                        <object
+                            data={pdfUrl}
+                            type="application/pdf"
+                            className="w-full h-full"
+                            onError={() => setIsError(true)}
+                        >
+                            <iframe
+                                src={pdfUrl}
+                                className="w-full h-full"
+                                title="PDF Preview"
+                                onError={() => setIsError(true)}
+                            >
+                                <p>Your browser does not support PDF preview.</p>
+                                <a
+                                    href={pdfUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Click here to view the PDF
+                                </a>
+                            </iframe>
+                        </object>
+                    )}
                 </div>
             </div>
         </div>
@@ -61,9 +95,10 @@ function CasesManagement() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCriteria, setFilterCriteria] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [casesPerPage] = useState(5); // Number of cases per page
+    const [casesPerPage] = useState(2); // Number of cases per page
     const [showPdfPreview, setShowPdfPreview] = useState(false);
     const [selectedPdf, setSelectedPdf] = useState(null);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -74,7 +109,7 @@ function CasesManagement() {
         try {
             setLoading(true);
             // const response = await fetch('https://law-api-8un9.onrender.com/cases');
-            const response = await getCases();
+            const response = await getUserCases();
 
             // const data = await response.json();
             setCases(response.data);
@@ -114,44 +149,55 @@ function CasesManagement() {
         formData.append('title', caseData.title);
         formData.append('summary', caseData.summary);
         formData.append('citation', caseData.citation);
+        
         if (caseData.icon) {
             formData.append('icon', caseData.icon);
         }
 
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            toast.error('Authentication token not found. Please log in again.');
+            setLoading(false);
+            navigate('/login');
+            return;
+        }
+
         try {
-            const url = isEditing
-                ? `https://law-api-8un9.onrender.com/cases/${editingId}`
-                : 'https://law-api-8un9.onrender.com/cases';
+            const response = await createCase(formData, `Bearer ${token}`);
 
-            const method = isEditing ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                body: formData,
-            });
-
-            if (response.ok) {
-                alert(isEditing ? 'Case updated successfully!' : 'Case uploaded successfully!');
+            if (response.status === 200 || response.status === 201) {
+                toast.success('Case uploaded successfully!');
                 resetForm();
                 fetchCases();
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(isEditing ? 'Failed to update case' : 'Failed to upload case');
+            if (error?.response?.status === 401) {
+                localStorage.removeItem('token');
+                toast.error('Session expired. Please login again.');
+                navigate('/login');
+                return;
+            }
+            const errorMessage = error?.response?.data?.message || 'Failed to upload case';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     // Delete
-
-     
-    
     const handleDelete = async (id) => {
         try {
+            if (!id) {
+                toast.error('Invalid case ID');
+                return;
+            }
+
             const result = await Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
+
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -160,21 +206,17 @@ function CasesManagement() {
             });
 
             if (!result.isConfirmed) {
-                
-                toast.info('Deletion cancelled');
                 return;
             }
 
             setLoading(true);
-            const response = await deleteCase(id);
+            await deleteCase(id);
+            toast.success('Case deleted successfully');
+            await fetchCases(); // Refresh the cases list
 
-            if (response.status === 200) {
-                toast.success('Case deleted successfully');
-                fetchCases(); // Refresh the cases list
-            }
         } catch (error) {
             console.error('Error deleting case:', error);
-            toast.error(error.response?.data?.message || 'Failed to delete case');
+            toast.error(error?.response?.data?.message || 'Failed to delete case');
         } finally {
             setLoading(false);
         }
@@ -183,7 +225,7 @@ function CasesManagement() {
     // Edit
     const handleEdit = (caseItem) => {
         setIsEditing(true);
-        setEditingId(caseItem._id);
+        setEditingId(caseItem.id);
         setCaseData({
             title: caseItem.title,
             summary: caseItem.summary,
@@ -199,6 +241,9 @@ function CasesManagement() {
         e.preventDefault();
         setLoading(true);
 
+        // Debug log
+        console.log('Updating case with ID:', editingId);
+
         const formData = new FormData();
         formData.append('title', caseData.title);
         formData.append('summary', caseData.summary);
@@ -209,22 +254,29 @@ function CasesManagement() {
         }
 
         try {
-            const response = await fetch(`https://law-api-8un9.onrender.com/cases/${editingId}`, {
-                method: 'PATCH',
-                body: formData,
-            });
+            // Make sure editingId exists and is in the correct format
+            if (!editingId) {
+                toast.error('No case selected for update');
+                return;
+            }
 
-            if (response.ok) {
-                alert('Case updated successfully!');
+            const response = await updateCase(editingId, formData);
+            if (response.status === 200 || response.status === 201) {
+                toast.success('Case updated successfully!');
                 resetForm();
                 fetchCases();
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update case');
+                setEditingId(null); // Clear editing state
             }
         } catch (error) {
             console.error('Error updating case:', error);
-            alert(error.message || 'Failed to update case');
+            console.log('Error response:', error.response); // Debug log
+            
+            if (error.response?.status === 404) {
+                toast.error('Case not found. Please refresh and try again.');
+            } else {
+                const errorMessage = error?.response?.data?.message || 'Failed to update case';
+                toast.error(errorMessage);
+            }
         } finally {
             setLoading(false);
         }
@@ -251,6 +303,19 @@ function CasesManagement() {
                 caseItem.summary.toLowerCase().includes(searchTerm.toLowerCase());
 
             if (filterCriteria === 'all') return matchesSearch;
+            if (filterCriteria === 'recent') {
+                // Assuming cases have a timestamp or date field
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                return matchesSearch && new Date(caseItem.createdAt) >= thirtyDaysAgo;
+            }
+            if (filterCriteria === 'constitutional law') {
+                return matchesSearch && caseItem.category === 'constitutional';
+            }
+            if (filterCriteria === 'criminal') {
+                return matchesSearch && caseItem.category === 'criminal';
+            }
+            
             // Add more filter criteria as needed
             return matchesSearch;
         });
@@ -350,6 +415,7 @@ function CasesManagement() {
     };
 
     const handlePreview = (pdfUrl) => {
+        console.log('PDF URL:', pdfUrl);
         setSelectedPdf(pdfUrl);
         setShowPdfPreview(true);
     };
@@ -369,13 +435,27 @@ function CasesManagement() {
                         onClick={() => handlePreview(caseItem.icon)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                         title="Preview PDF"
+                        
                     >
                         <FiEye />
                     </button>
                     <button
-                        onClick={() => window.open(caseItem.icon, '_blank')}
+                        // onClick={() => window.open(caseItem.icon, '_blank')}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
                         title="Download PDF"
+                    onClick={() => {
+                        const downloadUrl = caseItem.icon;
+                        const fileName = `${caseItem.title}.pdf`;
+                        
+                        const link = document.createElement('a');
+                        link.href = downloadUrl;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        return downloadLink;
+                    }}
                     >
                         <FiDownload />
                     </button>
@@ -387,7 +467,7 @@ function CasesManagement() {
                         <FiEdit />
                     </button>
                     <button
-                        onClick={() => handleDelete(caseItem._id)}
+                        onClick={() => handleDelete(caseItem.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-full"
                         title="Delete Case"
                     >
@@ -562,7 +642,7 @@ function CasesManagement() {
                             <div className="space-y-4">
                                 {currentCases.map((caseItem) => (
                                     <CaseItem
-                                        key={caseItem._id}
+                                        key={caseItem.id}
                                         caseItem={caseItem}
                                     />
                                 ))}

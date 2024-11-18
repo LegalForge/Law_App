@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaCheckCircle } from 'react-icons/fa';
 import { registerUser } from '../services/Auth';
+import { toast } from 'react-toastify';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ function Register() {
       console.log(formData);
       // console.log(response);
       if (response.status === 200) {
-        navigate('/admin');
+        navigate('/student');
         toast.success('Registration successful',);
       }
     } catch (err) {
@@ -118,6 +119,19 @@ function Register() {
               </div>
               
             </div>
+            <div>
+              <select
+                id="role"
+                name="role"
+                className="mt-1 block w-full py-3 px-4 border border-gray-300 bg-gray-50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              >
+                <option value="">Select Role</option>
+                <option value="user">Student</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
 
             <div className="flex items-center">
               <input
@@ -138,6 +152,7 @@ function Register() {
                 </a>
               </label>
             </div>
+            
 
             <button
               type="submit"
