@@ -14,7 +14,8 @@ function StudentNavbar({ isSidebarOpen, setSidebarOpen, activeTab }) {
               <FiMenu className="w-6 h-6" />
             </button>
             <h1 className="text-xl font-bold text-blue-600 ml-2 lg:ml-0">
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              {activeTab ? activeTab.charAt(0).toUpperCase() + activeTab.slice(1) : 'Dashboard'}
+              
             </h1>
           </div>
           

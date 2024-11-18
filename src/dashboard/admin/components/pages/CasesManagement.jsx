@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiUpload, FiDownload, FiTrash2, FiEdit, FiX, FiChevronLeft, FiChevronRight, FiEye } from 'react-icons/fi';
 import { FiSearch } from "react-icons/fi";
 import { toast } from 'react-toastify';
-import { getCases, updateCase } from '../../../../services/Cases';
+import { getUserCases, updateCase } from '../../../../services/Cases';
 import Swal from 'sweetalert2';
 import { deleteCase } from '../../../../services/Cases';
 import { createCase } from '../../../../services/Cases';
@@ -109,7 +109,7 @@ function CasesManagement() {
         try {
             setLoading(true);
             // const response = await fetch('https://law-api-8un9.onrender.com/cases');
-            const response = await getCases();
+            const response = await getUserCases();
 
             // const data = await response.json();
             setCases(response.data);

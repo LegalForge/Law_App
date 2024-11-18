@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import StudentSidebar from './components/StudentSidebar';
 import StudentNavbar from './components/StudentNavbar';
-import AvailableQuizzes from './components/pages/AvailableQuizzes';
-import QuizSession from './components/pages/QuizSession';
-import Progress from './components/pages/Progress';
-import QuizSection from './components/QuizSection';
-import ResultSection from './components/ResultSection';
-import Profile from './components/pages/Profile';
-import HelpSupport from './components/pages/HelpSupport';
-import Achievements from './components/pages/Achievements';
-import Dashboard from './components/pages/Dashboard';
+import AvailableContent from './pages/AvailableContent';
+// import QuizSession from './pages/QuizSession';
+// import Progress from './pages/Progress';
+// import QuizSection from './components/QuizSection';
+// import ResultSection from './components/ResultSection';
+// import Profile from './pages/Profile';
+// import HelpSupport from '../student/pages/HelpSupport';
+// import HelpSupport from './pages/HelpSupport';
+// import Achievements from './pages/Achievements';
+// import Dashboard from './pages/Dashboard';
+import Dashboard from '../student/pages/Dashboard';
 
 function StudentDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -19,9 +21,14 @@ function StudentDashboard() {
   const [score, setScore] = useState(0);
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [quizHistory, setQuizHistory] = useState([]);
+  const [activeCase, setActiveCase] = useState(null);
 
   const handleStartQuiz = (quizId) => {
     setActiveQuiz(quizId);
+  };
+
+  const handleStartCase = (caseId) => {
+    setActiveCase(caseId);
   };
 
   const handleQuizComplete = (results) => {
@@ -44,11 +51,18 @@ function StudentDashboard() {
       return <QuizSession quizId={activeQuiz} onComplete={handleQuizComplete} />;
     }
 
+    if (activeCase) {
+      return <CaseSession caseId={activeCase} onComplete={handleCaseComplete} />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
       case 'quizzes':
-        return <AvailableQuizzes onStartQuiz={handleStartQuiz} />;
+        return <AvailableContent 
+          onStartQuiz={handleStartQuiz} 
+          onStartCase={handleStartCase}
+        />;
       case 'progress':
         return <Progress />;
       case 'profile':

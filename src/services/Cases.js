@@ -1,10 +1,13 @@
 import { apiClient } from "./Config";
 
+export const getUserCases = async () => {
+    return await apiClient.get('/users/me/cases');
+}
 export const getCases = async () => {
     return await apiClient.get('/cases');
 }
-export const getCaseById = async (id) => {
-    return await apiClient.get(`/cases/${id}`);
+export const getCaseById = async (caseId) => {
+    return await apiClient.get(`/cases/${caseId}`);
 }
 
 export const createCase = async (payload, token) => {

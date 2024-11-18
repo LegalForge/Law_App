@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
-import { getCases } from '../../../../services/Cases';
+import { getUserCases } from '../../../../services/Cases';
 
 function QuizManagement() {
   const [cases, setCases] = useState([]);
@@ -23,7 +23,7 @@ function QuizManagement() {
   const fetchCases = async () => {
     try {
       setLoading(true);
-      const response = await getCases();
+      const response = await getUserCases();
       setCases(response.data);
     } catch (error) {
       console.error("Error fetching cases:", error);
