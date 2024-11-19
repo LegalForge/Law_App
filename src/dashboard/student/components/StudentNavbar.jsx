@@ -1,5 +1,7 @@
 import React from 'react';
-import { FiMenu, FiBell } from 'react-icons/fi';
+import { FiMenu, FiBell,FiSettings,FiLogOut } from 'react-icons/fi';
+
+import { useState } from 'react';
 
 function StudentNavbar({ isSidebarOpen, setSidebarOpen, activeTab }) {
   return (
@@ -45,14 +47,53 @@ function NotificationBell() {
 }
 
 function UserMenu() {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="flex items-center space-x-3">
       <div className="hidden md:block text-right">
         <p className="text-sm font-medium text-gray-900">John Doe</p>
-        <p className="text-xs text-gray-500">Student</p>
+        <p className="text-xs text-gray-500">Level 300</p>
       </div>
-      <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center">
-        JD
+      <div className="relative">
+        <button 
+          onClick={() => setIsOpen(!isOpen)} 
+          className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"
+        >
+          JD
+        </button>
+        {isOpen && (
+          <>
+            <div 
+              className="fixed inset-0" 
+              onClick={() => setIsOpen(false)}
+            ></div>
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+              <div className="py-1">
+                <a
+                  href="#settings"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <div className="flex items-center">
+                    <FiSettings className="w-4 h-4 mr-2" />
+                    Settings
+                  </div>
+                </a>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login';
+                  }}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <div className="flex items-center text-blue-500">
+                    <FiLogOut className="w-4 h-4 mr-2 text-blue-500" />
+                    Logout
+                  </div>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

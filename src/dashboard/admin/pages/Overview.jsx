@@ -12,7 +12,7 @@ import {
   FiPlus
 } from 'react-icons/fi';
 
-function AdminDashboard() {
+const Overview = () => {
   // Sample data - replace with actual API calls
   const dashboardData = {
     stats: {
@@ -238,4 +238,4 @@ function StatCard({ icon: Icon, title, value, trend, color }) {
   );
 }
 
-export default AdminDashboard; 
+export default Overview; 

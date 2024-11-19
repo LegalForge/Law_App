@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { FiUpload, FiDownload, FiTrash2, FiEdit, FiX, FiChevronLeft, FiChevronRight, FiEye } from 'react-icons/fi';
 import { FiSearch } from "react-icons/fi";
 import { toast } from 'react-toastify';
-import { getUserCases, updateCase } from '../../../../services/Cases';
+import { getUserCases, updateCase } from '../../../services/Cases';
 import Swal from 'sweetalert2';
-import { deleteCase } from '../../../../services/Cases';
-import { createCase } from '../../../../services/Cases';
+import { deleteCase } from '../../../services/Cases';
+import { createCase } from '../../../services/Cases';
 import { useNavigate } from 'react-router-dom';
 
  

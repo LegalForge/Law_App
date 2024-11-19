@@ -11,8 +11,9 @@ import {
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function AdminNavbar() {
+const AdminNavbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
  
   const handleLogout = () => {
@@ -51,7 +52,7 @@ function AdminNavbar() {
   return (
     <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-28">
           {/* Search Bar */}
           <div className="flex-1 max-w-xs">
             <div className="relative">
@@ -113,6 +114,7 @@ function AdminNavbar() {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
+                onBlur={() => setIsProfileOpen(false)}
                 className="flex items-center space-x-3 focus:outline-none"
               >
                 <div className="flex items-center space-x-2">
@@ -126,17 +128,21 @@ function AdminNavbar() {
 
               {/* Profile Menu */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border">
+                <div 
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border"
+                  onBlur={() => setIsProfileOpen(false)}
+                  tabIndex={0}
+                >
                   <a
                     href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                    className="  px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                   >
                     <FiSettings className="h-4 w-4" />
                     <span>Settings</span>
                   </a>
                   <a
                     href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                    className="  px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                   >
                     <FiHelpCircle className="h-4 w-4" />
                     <span>Help & Support</span>
@@ -144,11 +150,10 @@ function AdminNavbar() {
                   <div className="border-t border-gray-200"></div>
                   <a
                     href="#"
-                    className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center space-x-2"
+                    className="  px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 flex items-center space-x-2"
                   >
                     <FiLogOut className="h-4 w-4" />
                     <span onClick={handleLogout}>Sign out</span>
-                    {/* <span>Sign out</span> */}
                   </a>
                 </div>
               )}
