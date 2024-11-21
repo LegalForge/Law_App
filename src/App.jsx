@@ -11,6 +11,7 @@ import AuthGuard from './components/guards/AuthGuard';
 import CaseDetails from './dashboard/student/pages/CaseDetails';
 // import CaseDetails from './dashboard/student/components/pages/CaseDetails';
 // import SingleCase from './dashboard/student/pages/SingleCase';
+import QuizAttempt from './dashboard/student/pages/QuizAttempt';
 
 
 function App() {
@@ -30,6 +31,10 @@ function App() {
     {
       path:"cases/:id",
       element:<CaseDetails />
+    },
+    {
+      path: "quiz/:id",
+      element: <QuizAttempt />
     },
     {
       path: "admin",

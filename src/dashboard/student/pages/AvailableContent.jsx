@@ -46,6 +46,10 @@ function AvailableContent({ onStartQuiz, onStartCase }) {
         navigate(`/cases/${caseId}`);
     };
 
+    const handleStartQuiz = (quizId) => {
+        navigate(`/quiz/${quizId}`);
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -109,7 +113,7 @@ function AvailableContent({ onStartQuiz, onStartCase }) {
                                     key={quiz.id}
                                     type="quiz" 
                                     data={quiz}
-                                    onStart={() => onStartQuiz(quiz.id)}
+                                    onStart={() => handleStartQuiz(quiz.id)}
                                     onView={() => console.log('Quiz details not implemented yet')}
                                 />
                             </div>
