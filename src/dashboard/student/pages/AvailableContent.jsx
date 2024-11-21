@@ -1,42 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCases } from '../../../services/Cases';
+import { getQuizzes } from '../../../services/Quizzes';
 
 function AvailableContent({ onStartQuiz, onStartCase }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('all');
     const [cases, setCases] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // Static quiz data
-    const staticQuizzes = [
-        {
-            id: 'quiz1',
-            title: 'Basic Medical Terminology',
-            description: 'Test your knowledge of fundamental medical terms and concepts',
-            duration: '20 mins',
-            totalQuestions: 15,
-            difficulty: 'Beginner',
-            topics: ['Anatomy', 'Medical Terms', 'Basic Concepts']
-        },
-        {
-            id: 'quiz2',
-            title: 'Advanced Pathology',
-            description: 'Comprehensive quiz on pathological conditions and diagnoses',
-            duration: '30 mins',
-            totalQuestions: 20,
-            difficulty: 'Advanced',
-            topics: ['Pathology', 'Diagnosis', 'Treatment']
-        }
-    ];
 
     useEffect(() => {
         const fetchCases = async () => {
             try {
                 setLoading(true);
                 const response = await getCases();
-                console.log('API Response:', response.data); // Debug log
+                console.log('API Response:', response.data);
                 setCases(response.data);
             } catch (err) {
                 setError('Failed to load cases. Please try again later.');
@@ -49,8 +29,16 @@ function AvailableContent({ onStartQuiz, onStartCase }) {
         fetchCases();
     }, []);
 
+    useEffect(() => {
+        const fetchQuizzes = async () => {
+            const response = await getQuizzes();
+            setQuizzes(response.data);
+        };
+        fetchQuizzes();
+    }, []);
+
     const handleViewCase = (caseId) => {
-        console.log('Viewing case:', caseId); // Debug log
+        console.log('Viewing case:', caseId);
         if (!caseId) {
             console.error('No case ID provided');
             return;
@@ -110,93 +98,99 @@ function AvailableContent({ onStartQuiz, onStartCase }) {
             {/* Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Render Quizzes */}
-                {(activeTab === 'all' || activeTab === 'quizzes') &&
-                    staticQuizzes.map(quiz => (
-                        <ContentCard
-                            key={quiz.id}
-                            type="quiz"
-                            data={quiz}
-                            onStart={() => onStartQuiz(quiz.id)}
-                            onView={() => console.log('Quiz details not implemented yet')}
-                        />
-                    ))
-                }
+                {(activeTab === 'all' || activeTab === 'quizzes') && (
+                    <>
+                        {quizzes.map(quiz => (
+                            <div key={quiz.id} className="relative">
+                                <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                    Quiz
+                                </div>
+                                <ContentCard
+                                    key={quiz.id}
+                                    type="quiz" 
+                                    data={quiz}
+                                    onStart={() => onStartQuiz(quiz.id)}
+                                    onView={() => console.log('Quiz details not implemented yet')}
+                                />
+                            </div>
+                        ))}
+                    </>
+                )}
 
                 {/* Render Cases */}
                 {(activeTab === 'all' || activeTab === 'cases') &&
                     cases.map(caseItem => (
-
-                        <div
-                            className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer border border-gray-200 p-6"
-                            onClick={() => handleViewCase(caseItem.id)}
-                        >
-                            <div className="space-y-6">
-                                {caseItem.title && (
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-2xl font-bold text-gray-800 tracking-tight">
-                                            {caseItem.title}
-                                        </h3>
-                                    </div>
-                                )}
-
-                                {caseItem.summary && (
-                                    <div className="bg-gray-100 rounded-md p-4">
-                                        <p className="text-gray-700 line-clamp-3 leading-relaxed">
-                                            {caseItem.summary.length > 150 ? `${caseItem.summary.substring(0, 150)}...` : caseItem.summary}
-                                            {/* {caseItem.summary.length > 150 ? `${caseItem.summary.substring(0, 10)}...` : caseItem.summary} */}
-                                        </p>
-                                    </div>
-                                )}
-
-
-
-                                <div className="flex justify-between items-center pt-6 border-t border-gray-100">
-                                    <div className="flex items-center space-x-2">
-                                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <div className="text-sm text-gray-500 font-medium">
-                                            Added {new Date(caseItem.createdAt).toLocaleDateString('en-US', {
-                                                weekday: 'short',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric'
-                                            })}
+                        <div key={caseItem.id} className="relative">
+                            <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                Case
+                            </div>
+                            <div
+                                className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer border border-gray-200 p-6"
+                                onClick={() => handleViewCase(caseItem.id)}
+                            >
+                                <div className="space-y-6">
+                                    {caseItem.title && (
+                                        <div className="border-b border-gray-200 pb-4">
+                                            <h3 className="text-2xl font-bold text-gray-800 tracking-tight">
+                                                {caseItem.title}
+                                            </h3>
                                         </div>
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleViewCase(caseItem.id);
-                                        }}
-                                        className="inline-flex items-center px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                                    >
-                                        <span>Details</span>
-                                        <svg
-                                            className="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
+                                    )}
+
+                                    {caseItem.summary && (
+                                        <div className="bg-gray-100 rounded-md p-4">
+                                            <p className="text-gray-700 line-clamp-3 leading-relaxed">
+                                                {caseItem.summary.length > 150 ? `${caseItem.summary.substring(0, 150)}...` : caseItem.summary}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-between items-center pt-6 border-t border-gray-100">
+                                        <div className="flex items-center space-x-2">
+                                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div className="text-sm text-gray-500 font-medium">
+                                                Added {new Date(caseItem.createdAt).toLocaleDateString('en-US', {
+                                                    weekday: 'short',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric'
+                                                })}
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleViewCase(caseItem.id);
+                                            }}
+                                            className="inline-flex items-center px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                                         >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 5l7 7-7 7"
-                                            />
-                                        </svg>
-                                    </button>
+                                            <span>Details</span>
+                                            <svg
+                                                className="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 5l7 7-7 7"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-
                     ))
                 }
             </div>
 
             {/* Empty States */}
-            {renderEmptyState(activeTab, cases, staticQuizzes)}
+            {renderEmptyState(activeTab, cases, quizzes)}
         </div>
     );
 }
@@ -295,4 +289,4 @@ function renderEmptyState(activeTab, cases, quizzes) {
     return null;
 }
 
-export default AvailableContent; 
+export default AvailableContent;
