@@ -15,6 +15,7 @@ function QuizAttempt() {
     const [showResults, setShowResults] = useState(false);
     const [score, setScore] = useState(0);
     const [totalQuestions, setTotalQuestions] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(null);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -27,6 +28,9 @@ function QuizAttempt() {
                 }
                 setQuiz(response.data);
                 setTotalQuestions(response.data.questions.length);
+                // Set initial timer (3 minutes per question)
+                const totalTime = response.data.questions.length * 180; // 180 seconds = 3 minutes
+                setTimeLeft(totalTime);
             } catch (err) {
                 let errorMessage = 'Failed to load quiz. Please try again later.';
                 if (err.response?.status === 500) {
@@ -43,6 +47,27 @@ function QuizAttempt() {
 
         fetchQuiz();
     }, [id]);
+
+    useEffect(() => {
+        if (timeLeft === null || showResults) return;
+
+        if (timeLeft === 0) {
+            handleSubmit();
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setTimeLeft(prev => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timeLeft, showResults]);
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
 
     const handleAnswerSelect = (questionId, selectedOption) => {
         setAnswers(prev => ({
@@ -281,6 +306,9 @@ function QuizAttempt() {
                                 Question {currentQuestion + 1} of {quiz.questions.length}
                             </span>
                         </div>
+                        <div className={`inline-block px-4 py-2 rounded-full ${timeLeft <= 60 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} font-medium`}>
+                            Time Remaining: {formatTime(timeLeft)}
+                        </div>
                     </div>
                 </div>
 
@@ -343,9 +371,6 @@ function QuizAttempt() {
             </div>
         );
     };
-
-    // Calculate progress percentage based on current question
-    const progress = quiz?.questions ? Math.round(((currentQuestion + 1) / quiz.questions.length) * 100) : 0;
 
     // Calculate progress
     const quizProgress = totalQuestions > 0 

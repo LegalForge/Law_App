@@ -220,41 +220,46 @@ function ContentCard({ type, data, onStart, onView }) {
     const { title, description, duration, difficulty } = data;
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 space-y-4 hover:shadow-xl transition-shadow duration-200">
             <div className="flex items-center justify-between">
-                <span className={`px-2 py-1 rounded text-sm ${type === 'quiz'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
-                    }`}>
+                <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                    type === 'quiz' 
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                }`}>
                     {type === 'quiz' ? 'Quiz' : 'Case'}
                 </span>
-                {duration && <span className="text-gray-500 text-sm">{duration}</span>}
+                {duration && (
+                    <span className="text-gray-600 text-sm font-medium">
+                        {duration}
+                    </span>
+                )}
             </div>
 
-            <div>
-                <h3 className="text-lg font-semibold">{title}</h3>
-                <p className="text-gray-600 mt-1 line-clamp-2">{description}</p>
+            <div className="space-y-2">
+                <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+                <p className="text-gray-600 text-base line-clamp-2">{description}</p>
             </div>
 
             {difficulty && (
-                <span className={`inline-block px-2 py-1 rounded-full text-sm ${difficulty === 'Advanced' ? 'bg-red-100 text-red-800' :
-                    difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                    }`}>
+                <span className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium ${
+                    difficulty === 'Advanced' 
+                        ? 'bg-red-100 text-red-800' 
+                        : difficulty === 'Intermediate' 
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-green-100 text-green-800'
+                }`}>
                     {difficulty}
                 </span>
             )}
 
-            <div className="flex space-x-3">
-                <button
-                    onClick={onView}
-                    className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                    View Details
-                </button>
+            <div className="flex space-x-3 pt-2">
                 <button
                     onClick={onStart}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-medium
+                        hover:bg-blue-700 active:bg-blue-800
+                        transition-colors duration-200 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                     Start
                 </button>
