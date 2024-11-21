@@ -14,6 +14,8 @@ function QuizAttempt() {
     const [error, setError] = useState(null);
     const [showResults, setShowResults] = useState(false);
     const [score, setScore] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(null);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -25,6 +27,10 @@ function QuizAttempt() {
                     throw new Error('No quiz data received');
                 }
                 setQuiz(response.data);
+                setTotalQuestions(response.data.questions.length);
+                // Set initial timer (3 minutes per question)
+                const totalTime = response.data.questions.length * 180; // 180 seconds = 3 minutes
+                setTimeLeft(totalTime);
             } catch (err) {
                 let errorMessage = 'Failed to load quiz. Please try again later.';
                 if (err.response?.status === 500) {
@@ -41,6 +47,27 @@ function QuizAttempt() {
 
         fetchQuiz();
     }, [id]);
+
+    useEffect(() => {
+        if (timeLeft === null || showResults) return;
+
+        if (timeLeft === 0) {
+            handleSubmit();
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setTimeLeft(prev => prev - 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [timeLeft, showResults]);
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
 
     const handleAnswerSelect = (questionId, selectedOption) => {
         setAnswers(prev => ({
@@ -62,6 +89,8 @@ function QuizAttempt() {
     };
 
     const calculateScore = () => {
+        if (!quiz?.questions) return 0;
+
         let correctAnswers = 0;
         quiz.questions.forEach(question => {
             if (answers[question.id] === question.correctAnswer) {
@@ -71,7 +100,7 @@ function QuizAttempt() {
         return Math.round((correctAnswers / quiz.questions.length) * 100);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
         const finalScore = calculateScore();
         setScore(finalScore);
         setShowResults(true);
@@ -82,46 +111,126 @@ function QuizAttempt() {
             <div className="max-w-4xl mx-auto px-6 py-10">
                 <div className="bg-white rounded-xl shadow-xl p-8 mb-8">
                     <h2 className="text-3xl font-bold text-center mb-8">Quiz Results</h2>
-                    
-                    <div className="text-center mb-8">
-                        <div className="text-6xl font-bold text-blue-600 mb-2">{score}%</div>
-                        <p className="text-gray-600">Your Score</p>
+
+                    {/* Score Summary */}
+                    <div className="grid grid-cols-2 gap-6 mb-8">
+                        <div className="text-center p-6 bg-blue-50 rounded-xl">
+                            <div className="text-6xl font-bold text-blue-600 mb-2">
+                                {Math.round((quiz.questions.filter(q => answers[q.id] === q.correctAnswer).length / quiz.questions.length) * 100)}%
+                            </div>
+                            <p className="text-gray-600">Final Score</p>
+                        </div>
+                        <div className="text-center p-6 bg-green-50 rounded-xl">
+                            <div className="text-6xl font-bold text-green-600 mb-2">
+                                {quiz.questions.filter(q => answers[q.id] === q.correctAnswer).length}/{quiz.questions.length}
+                            </div>
+                            <p className="text-gray-600">Correct Answers</p>
+                        </div>
                     </div>
 
+                    {/* Questions Review */}
                     <div className="space-y-6">
                         {quiz.questions.map((question, index) => {
                             const isCorrect = answers[question.id] === question.correctAnswer;
+                            const selectedOption = question.options.find(opt => opt.text === answers[question.id]);
+                            const correctOption = question.options.find(opt => opt.text === question.correctAnswer);
+
                             return (
-                                <div key={index} className="bg-gray-50 rounded-lg p-6">
-                                    {/* Question Section */}
+                                <div key={index} className={`rounded-lg p-6 ${isCorrect ? 'bg-green-50' : 'bg-red-50'
+                                    }`}>
+                                    {/* Question Header */}
                                     <div className="mb-4 border-b pb-4">
                                         <div className="flex items-center gap-2">
-                                            <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                                                isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                                            }`}>
+                                            <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                                                }`}>
                                                 {isCorrect ? '✓' : '✗'}
                                             </span>
-                                            <span className="font-medium text-gray-600">Question {index + 1}:</span>
+                                            <span className="font-medium text-gray-600">Question {index + 1}</span>
                                         </div>
                                         <p className="text-xl font-semibold mt-2 ml-10">
                                             {question.questionText || question.question}
                                         </p>
                                     </div>
-                                    
-                                    {/* Answers Section */}
+
+                                    {/* Answer Comparison */}
                                     <div className="ml-10 space-y-3">
                                         <div className="flex items-start gap-2">
                                             <span className="font-medium min-w-24">Your answer:</span>
-                                            <span className={`${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                                            <span className={`${isCorrect ? 'text-green-600' : 'text-red-600'
+                                                } font-medium`}>
                                                 {answers[question.id]}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="flex items-start gap-2">
                                             <span className="font-medium min-w-24">Correct answer:</span>
-                                            <span className="text-green-600">
+                                            <span className="text-green-600 font-medium">
                                                 {question.correctAnswer}
                                             </span>
+                                        </div>
+
+                                        {/* Enhanced Explanation Section */}
+                                        <div className="mt-6 ml-10">
+                                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                                                    <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                        </svg>
+                                                        Detailed Explanation
+                                                    </h4>
+                                                </div>
+
+                                                <div className="p-4 space-y-4">
+                                                    {/* General Explanation */}
+                                                    <div className="text-gray-700">
+                                                        <p className="mb-3">{question.explanation || "No explanation provided for this question."}</p>
+                                                    </div>
+
+                                                    {/* Why Your Answer is Correct/Incorrect */}
+                                                    <div className={`p-3 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'
+                                                        }`}>
+                                                        <h5 className={`font-medium mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'
+                                                            }`}>
+                                                            {isCorrect ? '✓ Why this is correct:' : '✗ Why this is incorrect:'}
+                                                        </h5>
+                                                        <p className="text-gray-700">
+                                                            {selectedOption?.explanation ||
+                                                                (isCorrect
+                                                                    ? "Great job! You selected the correct answer."
+                                                                    : "This wasn't the best choice. Let's see why:")}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Correct Answer Explanation */}
+                                                    {!isCorrect && (
+                                                        <div className="p-3 bg-blue-50 rounded-lg">
+                                                            <h5 className="font-medium mb-2 text-blue-700">
+                                                                The correct answer explained:
+                                                            </h5>
+                                                            <p className="text-gray-700">
+                                                                {correctOption?.explanation ||
+                                                                    "The correct answer is more appropriate because it accurately addresses the question."}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Additional Resources */}
+                                                    {question.additionalResources && (
+                                                        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                                                            <h5 className="font-medium mb-2 text-gray-700 flex items-center gap-2">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                                                                </svg>
+                                                                Additional Resources
+                                                            </h5>
+                                                            <p className="text-gray-600">
+                                                                {question.additionalResources}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -129,7 +238,8 @@ function QuizAttempt() {
                         })}
                     </div>
 
-                    <div className="mt-8 text-center">
+                    {/* Navigation Button */}
+                    <div className="mt-8 flex justify-center gap-4">
                         <button
                             onClick={() => navigate('/student')}
                             className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
@@ -190,10 +300,15 @@ function QuizAttempt() {
                 {/* Quiz Header */}
                 <div className="mb-10 text-center">
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">{quiz.title}</h1>
-                    <div className="inline-block px-4 py-2 bg-blue-100 rounded-full">
-                        <span className="text-blue-800 font-medium">
-                            Question {currentQuestion + 1} of {quiz.questions.length}
-                        </span>
+                    <div className="flex justify-center gap-4">
+                        <div className="inline-block px-4 py-2 bg-blue-100 rounded-full">
+                            <span className="text-blue-800 font-medium">
+                                Question {currentQuestion + 1} of {quiz.questions.length}
+                            </span>
+                        </div>
+                        <div className={`inline-block px-4 py-2 rounded-full ${timeLeft <= 60 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} font-medium`}>
+                            Time Remaining: {formatTime(timeLeft)}
+                        </div>
                     </div>
                 </div>
 
@@ -209,8 +324,8 @@ function QuizAttempt() {
                             <label
                                 key={index}
                                 className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 
-                                    ${answers[currentQuestionData.id] === option.text 
-                                        ? 'border-blue-500 bg-blue-50' 
+                                    ${answers[currentQuestionData.id] === option.text
+                                        ? 'border-blue-500 bg-blue-50'
                                         : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`}
                             >
                                 <input
@@ -236,7 +351,7 @@ function QuizAttempt() {
                     >
                         ← Previous
                     </button>
-                    
+
                     {currentQuestion === quiz.questions.length - 1 ? (
                         <button
                             onClick={handleSubmit}
@@ -257,9 +372,14 @@ function QuizAttempt() {
         );
     };
 
+    // Calculate progress
+    const quizProgress = totalQuestions > 0 
+        ? Math.round(((currentQuestion + 1) / totalQuestions) * 100)
+        : 0;
+
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar />
+            <Sidebar quizProgress={quizProgress} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Navbar />
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-gray-50 to-gray-100">

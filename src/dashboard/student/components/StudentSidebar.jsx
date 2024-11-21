@@ -15,7 +15,7 @@ import SidebarProgress from './sidebar/SidebarProgress';
 import SidebarLogout from './sidebar/SidebarLogout';
 import SidebarNavigation from './sidebar/SidebarNavigation';
 
-const StudentSidebar = ({ activeTab, setActiveTab, isSidebarOpen }) => {
+const StudentSidebar = ({ activeTab, setActiveTab, isSidebarOpen, quizProgress }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: FiHome },
     { id: 'quizzes', label: 'Available Quizzes', icon: FiBook },
@@ -49,14 +49,11 @@ const StudentSidebar = ({ activeTab, setActiveTab, isSidebarOpen }) => {
       <div className="h-full flex flex-col">
         <SidebarProfile />
         <SidebarNavigation menuItems={menuItems} activeTab={activeTab} setActiveTab={setActiveTab} />
-        <SidebarProgress />
-        {/* Pass handleLogout as a prop */}
+        <SidebarProgress quizProgress={quizProgress} />
         <SidebarLogout handleLogout={handleLogout} />
       </div>
     </aside>
   );
 };
-
-
 
 export default StudentSidebar;
