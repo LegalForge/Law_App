@@ -14,6 +14,7 @@ function QuizAttempt() {
     const [error, setError] = useState(null);
     const [showResults, setShowResults] = useState(false);
     const [score, setScore] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState(0);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -25,6 +26,7 @@ function QuizAttempt() {
                     throw new Error('No quiz data received');
                 }
                 setQuiz(response.data);
+                setTotalQuestions(response.data.questions.length);
             } catch (err) {
                 let errorMessage = 'Failed to load quiz. Please try again later.';
                 if (err.response?.status === 500) {
@@ -63,7 +65,7 @@ function QuizAttempt() {
 
     const calculateScore = () => {
         if (!quiz?.questions) return 0;
-        
+
         let correctAnswers = 0;
         quiz.questions.forEach(question => {
             if (answers[question.id] === question.correctAnswer) {
@@ -84,7 +86,7 @@ function QuizAttempt() {
             <div className="max-w-4xl mx-auto px-6 py-10">
                 <div className="bg-white rounded-xl shadow-xl p-8 mb-8">
                     <h2 className="text-3xl font-bold text-center mb-8">Quiz Results</h2>
-                    
+
                     {/* Score Summary */}
                     <div className="grid grid-cols-2 gap-6 mb-8">
                         <div className="text-center p-6 bg-blue-50 rounded-xl">
@@ -107,17 +109,15 @@ function QuizAttempt() {
                             const isCorrect = answers[question.id] === question.correctAnswer;
                             const selectedOption = question.options.find(opt => opt.text === answers[question.id]);
                             const correctOption = question.options.find(opt => opt.text === question.correctAnswer);
-                            
+
                             return (
-                                <div key={index} className={`rounded-lg p-6 ${
-                                    isCorrect ? 'bg-green-50' : 'bg-red-50'
-                                }`}>
+                                <div key={index} className={`rounded-lg p-6 ${isCorrect ? 'bg-green-50' : 'bg-red-50'
+                                    }`}>
                                     {/* Question Header */}
                                     <div className="mb-4 border-b pb-4">
                                         <div className="flex items-center gap-2">
-                                            <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                                                isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                                            }`}>
+                                            <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                                                }`}>
                                                 {isCorrect ? '✓' : '✗'}
                                             </span>
                                             <span className="font-medium text-gray-600">Question {index + 1}</span>
@@ -131,13 +131,12 @@ function QuizAttempt() {
                                     <div className="ml-10 space-y-3">
                                         <div className="flex items-start gap-2">
                                             <span className="font-medium min-w-24">Your answer:</span>
-                                            <span className={`${
-                                                isCorrect ? 'text-green-600' : 'text-red-600'
-                                            } font-medium`}>
+                                            <span className={`${isCorrect ? 'text-green-600' : 'text-red-600'
+                                                } font-medium`}>
                                                 {answers[question.id]}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="flex items-start gap-2">
                                             <span className="font-medium min-w-24">Correct answer:</span>
                                             <span className="text-green-600 font-medium">
@@ -156,7 +155,7 @@ function QuizAttempt() {
                                                         Detailed Explanation
                                                     </h4>
                                                 </div>
-                                                
+
                                                 <div className="p-4 space-y-4">
                                                     {/* General Explanation */}
                                                     <div className="text-gray-700">
@@ -164,19 +163,17 @@ function QuizAttempt() {
                                                     </div>
 
                                                     {/* Why Your Answer is Correct/Incorrect */}
-                                                    <div className={`p-3 rounded-lg ${
-                                                        isCorrect ? 'bg-green-50' : 'bg-red-50'
-                                                    }`}>
-                                                        <h5 className={`font-medium mb-2 ${
-                                                            isCorrect ? 'text-green-700' : 'text-red-700'
+                                                    <div className={`p-3 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'
                                                         }`}>
+                                                        <h5 className={`font-medium mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'
+                                                            }`}>
                                                             {isCorrect ? '✓ Why this is correct:' : '✗ Why this is incorrect:'}
                                                         </h5>
                                                         <p className="text-gray-700">
-                                                            {selectedOption?.explanation || 
-                                                             (isCorrect 
-                                                                ? "Great job! You selected the correct answer."
-                                                                : "This wasn't the best choice. Let's see why:")}
+                                                            {selectedOption?.explanation ||
+                                                                (isCorrect
+                                                                    ? "Great job! You selected the correct answer."
+                                                                    : "This wasn't the best choice. Let's see why:")}
                                                         </p>
                                                     </div>
 
@@ -187,8 +184,8 @@ function QuizAttempt() {
                                                                 The correct answer explained:
                                                             </h5>
                                                             <p className="text-gray-700">
-                                                                {correctOption?.explanation || 
-                                                                 "The correct answer is more appropriate because it accurately addresses the question."}
+                                                                {correctOption?.explanation ||
+                                                                    "The correct answer is more appropriate because it accurately addresses the question."}
                                                             </p>
                                                         </div>
                                                     )}
@@ -299,8 +296,8 @@ function QuizAttempt() {
                             <label
                                 key={index}
                                 className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 
-                                    ${answers[currentQuestionData.id] === option.text 
-                                        ? 'border-blue-500 bg-blue-50' 
+                                    ${answers[currentQuestionData.id] === option.text
+                                        ? 'border-blue-500 bg-blue-50'
                                         : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`}
                             >
                                 <input
@@ -326,7 +323,7 @@ function QuizAttempt() {
                     >
                         ← Previous
                     </button>
-                    
+
                     {currentQuestion === quiz.questions.length - 1 ? (
                         <button
                             onClick={handleSubmit}
@@ -347,9 +344,17 @@ function QuizAttempt() {
         );
     };
 
+    // Calculate progress percentage based on current question
+    const progress = quiz?.questions ? Math.round(((currentQuestion + 1) / quiz.questions.length) * 100) : 0;
+
+    // Calculate progress
+    const quizProgress = totalQuestions > 0 
+        ? Math.round(((currentQuestion + 1) / totalQuestions) * 100)
+        : 0;
+
     return (
         <div className="flex h-screen bg-gray-50">
-            <Sidebar />
+            <Sidebar quizProgress={quizProgress} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Navbar />
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-b from-gray-50 to-gray-100">
