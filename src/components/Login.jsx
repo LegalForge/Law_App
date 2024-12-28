@@ -20,19 +20,15 @@ const Login = () => {
 
     try {
       const response = await loginUser(formData);
+      console.log('Login Response:', response);
+
       if (response.status === 200) {
         localStorage.setItem('token', response.data.accessToken);
-        // localStorage.setItem('user', JSON.stringify(response.data.user));
-        // console.log(response.data.user);
-        // if (response.data.user.role === 'admin' || response.data.user.role === 'user') {
-        //   navigate('/admin');
-        // } else {
-        //   navigate('/user');
-        // }
-        // toast.success('Welcome back!');
-        navigate('/admin');
+        navigate('/student');
+        toast.success('Welcome back!');
       }
     } catch (err) {
+      console.log('Full error:', err);
       const errorMessage = err.response?.data?.message || 'Invalid credentials. Please try again.';
       setError(errorMessage);
       toast.error(errorMessage);

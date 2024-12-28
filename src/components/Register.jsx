@@ -18,28 +18,33 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate password length if needed
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
       return;
     }
     try {
-      // Add your registration logic here
       setLoading(true);
       const response = await registerUser(formData);
-      console.log(formData);
-      // console.log(response);
+      console.log('Form Data:', formData);
+      
       if (response.status === 200) {
-        navigate('/student');
-        toast.success('Registration successful',);
+        // Store the token and role in localStorage
+        localStorage.setItem('token', response.data.accessToken); // Adjust based on your API response
+        localStorage.setItem('role', formData.role);
+        
+        if (formData.role === 'user') {
+          navigate('/student');
+        } else if (formData.role === 'admin') {
+          navigate('/admin');
+        }
+        toast.success('Registration successful');
       }
     } catch (err) {
       setError('Registration failed. Please try again.');
       toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
-      console.log(err);
+      console.log('Error:', err);
     } finally {
       setLoading(false);
-      
     }
   };
 
@@ -47,7 +52,7 @@ function Register() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">Legal Forage</h1>
+          <h1 className="text-4xl font-bold text-blue-600 mb-2">Legal Forge</h1>
           <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full mb-8"></div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
           <p className="text-gray-600">Join our community of legal professionals</p>
@@ -72,7 +77,7 @@ function Register() {
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Full name"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
 
@@ -86,7 +91,7 @@ function Register() {
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Email address"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
 
@@ -100,7 +105,7 @@ function Register() {
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
               </div>
 
@@ -114,10 +119,10 @@ function Register() {
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 transition-all duration-200 ease-in-out"
                   placeholder="Confirm password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
               </div>
-              
+
             </div>
             <div>
               <select
@@ -152,7 +157,7 @@ function Register() {
                 </a>
               </label>
             </div>
-            
+
 
             <button
               type="submit"
