@@ -16,7 +16,7 @@ const SidebarProfile = () => {
         </div>
         <div className="text-center mt-6 space-y-2">
           <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 transition-all duration-300">
-            Legal Forage
+            Legal Forge
           </h2>
           <p className="text-sm text-gray-600 font-semibold tracking-wide">Your Legal Learning Partner</p>
           <div className="flex justify-center space-x-1">
